@@ -1,6 +1,7 @@
 
 namespace Ice\Auth\Driver;
 
+use Ice\Arr;
 use Ice\Exception;
 use Ice\Auth\Driver;
 use Ice\Auth\Driver\DriverInterface;
@@ -37,10 +38,14 @@ class File extends Driver implements DriverInterface
                 let this->user = defaultValue;
             } else {
                 fetch user, this->users[username];
-                let this->user = user;
+                let user["username"] = username,
+                    this->user = user;
             }
         }
 
+        if this->user {
+            return new Arr(this->user);
+        }
         return this->user;
     }
 
@@ -72,11 +77,11 @@ class File extends Driver implements DriverInterface
     {
         var user;
 
-        if empty password {
-            return false;
-        }
-
         if username && fetch user, this->users[username] {
+            if empty password {
+                return false;
+            }
+
             if user["password"] === this->hash(password) {
                 // Complete the login
                 this->completeLogin(username, user["roles"]);
